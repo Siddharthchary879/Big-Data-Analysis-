@@ -1,0 +1,16 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, desc
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("Airline Delay Analysis").getOrCreate()
+
+# Load the dataset
+data_path = "airline_delay.csv"  # Replace with your dataset path
+df = spark.read.csv(data_path, header=True, inferSchema=True)
+
+# Analysis: Calculate average arrival delay by airline
+avg_arrival_delay = df.groupBy("Airline").agg(avg(col("ArrDelay")).alias("AvgArrivalDelay")).orderBy(desc("AvgArrivalDelay"))
+avg_arrival_delay.show(10)  # Show top 10 airlines with the highest average delays
+
+# Save results to CSV
+avg_arrival_delay.write.csv("output/avg_arrival_delay_by_airline.csv", header=True)
